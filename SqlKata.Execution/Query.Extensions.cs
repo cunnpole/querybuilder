@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using System;
-using SqlKata;
+using System.Collections.Generic;
+using System.Data;
 
-namespace SqlKata.Execution
-{
+namespace SqlKata.Execution {
     public static class QueryExtensions
     {
         public static IEnumerable<T> Get<T>(this Query query, IDbTransaction transaction = null)

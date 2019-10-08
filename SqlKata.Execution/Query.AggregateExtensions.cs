@@ -1,5 +1,5 @@
-namespace SqlKata.Execution
-{
+using System.Data;
+namespace SqlKata.Execution {
     public static class QueryAggregateExtensions
     {
         public static T Aggregate<T>(this Query query, string aggregateOperation, IDbTransaction transaction, params string[] columns)
@@ -9,7 +9,7 @@ namespace SqlKata.Execution
             return db.ExecuteScalar<T>(query.AsAggregate(aggregateOperation, columns));
         }
 
-        public static T Count<T>(this Query query, IDbTransaction transaction, params string[] columns)
+        public static T Count<T>(this Query query, IDbTransaction transaction = null, params string[] columns)
         {
             var db = QueryHelper.CreateQueryFactory(query, transaction);
 
