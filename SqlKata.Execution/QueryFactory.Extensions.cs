@@ -5,6 +5,8 @@ using System.Dynamic;
 using System.Linq;
 using Dapper;
 using Humanizer;
+using SqlKata;
+using System.Threading.Tasks;
 
 namespace SqlKata.Execution
 {
@@ -18,7 +20,8 @@ namespace SqlKata.Execution
 
             var result = db.Connection.Query<T>(
                 compiled.Sql,
-                compiled.NamedBindings,
+                compiled.NamedBindings, 
+                db.Transaction,
                 commandTimeout: db.QueryTimeout
             ).ToList();
 
@@ -31,7 +34,7 @@ namespace SqlKata.Execution
         {
             var compiled = db.Compile(query);
 
-            return db.Connection.Query(compiled.Sql, compiled.NamedBindings, commandTimeout: db.QueryTimeout) as IEnumerable<IDictionary<string, object>>;
+            return db.Connection.Query(compiled.Sql, compiled.NamedBindings, db.Transaction, commandTimeout: db.QueryTimeout) as IEnumerable<IDictionary<string, object>>;
         }
 
         public static IEnumerable<dynamic> Get(this QueryFactory db, Query query)
@@ -81,7 +84,7 @@ namespace SqlKata.Execution
             return db.Connection.Execute(
                 compiled.Sql,
                 compiled.NamedBindings,
-                transaction,
+                transaction ?? db.Transaction,
                 db.QueryTimeout,
                 commandType
             );
@@ -94,7 +97,7 @@ namespace SqlKata.Execution
             return db.Connection.ExecuteScalar<T>(
                 compiled.Sql,
                 compiled.NamedBindings,
-                transaction,
+                transaction ?? db.Transaction,
                 db.QueryTimeout,
                 commandType
             );
@@ -112,7 +115,7 @@ namespace SqlKata.Execution
             return db.Connection.QueryMultiple(
                 compiled.Sql,
                 compiled.NamedBindings,
-                transaction,
+                transaction ?? db.Transaction,
                 db.QueryTimeout,
                 commandType
             );
@@ -129,7 +132,7 @@ namespace SqlKata.Execution
 
             var multi = db.GetMultiple<T>(
                 queries,
-                transaction,
+                transaction ?? db.Transaction,
                 commandType
             );
 
@@ -258,7 +261,7 @@ namespace SqlKata.Execution
         #region free statements
         public static IEnumerable<T> Select<T>(this QueryFactory db, string sql, object param = null)
         {
-            return db.Connection.Query<T>(sql, param, commandTimeout: db.QueryTimeout);
+            return db.Connection.Query<T>(sql, param, db.Transaction, commandTimeout: db.QueryTimeout);
         }
         public static IEnumerable<dynamic> Select(this QueryFactory db, string sql, object param = null)
         {
@@ -266,7 +269,7 @@ namespace SqlKata.Execution
         }
         public static int Statement(this QueryFactory db, string sql, object param = null)
         {
-            return db.Connection.Execute(sql, param, commandTimeout: db.QueryTimeout);
+            return db.Connection.Execute(sql, param, db.Transaction, commandTimeout: db.QueryTimeout);
         }
         #endregion
 
